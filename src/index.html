@@ -1933,19 +1933,28 @@
   .ww-chat-screen {
     position: fixed;
     inset: 0;
-    background: #f8fafc;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: #0a1520;
     z-index: 200;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
   .ww-chat-header {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    background: #0f1a24;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
   }
   .ww-chat-back {
     background: none;
@@ -1984,9 +1993,10 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    max-width: 720px;
     width: 100%;
+    max-width: 720px;
     margin: 0 auto;
+    box-sizing: border-box;
   }
   .ww-chat-bubble {
     max-width: 85%;
@@ -1997,24 +2007,35 @@
   }
   .ww-chat-bubble.user {
     align-self: flex-end;
-    background: #0f1a24;
-    color: #ffffff;
+    background: #d4a843;
+    color: #0f1a24;
     border-radius: 12px 12px 2px 12px;
+    max-width: 85%;
+    font-weight: 600;
   }
   .ww-chat-bubble.assistant {
     align-self: flex-start;
-    background: #ffffff;
-    color: #1f2937;
-    border: 1px solid #e5e7eb;
+    background: rgba(255,255,255,0.06);
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.1);
     border-radius: 12px 12px 12px 2px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    max-width: 85%;
+  }
+  /* FIX 2 — force white text on every nested child of assistant bubbles
+     so any inherited dark color (from the legacy light-theme styles) is
+     overridden in the new dark chat surface. */
+  .ww-chat-bubble.assistant * {
+    color: #ffffff;
   }
   .ww-chat-bubble.assistant .ww-bubble-sender {
+    color: #d4a843 !important;
+  }
+  .ww-bubble-sender {
     font-size: 11px;
     font-weight: 700;
     color: #d4a843;
     text-transform: uppercase;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     margin-bottom: 6px;
   }
   .ww-typing-indicator {
@@ -2041,57 +2062,163 @@
     30% { transform: translateY(-6px); }
   }
   .ww-chat-input-area {
-    background: #ffffff;
-    border-top: 1px solid #e5e7eb;
-    padding: 12px 16px 20px;
+    background: #0f1a24;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 16px 24px;
     flex-shrink: 0;
-    max-width: 720px;
     width: 100%;
-    margin: 0 auto;
+    box-sizing: border-box;
   }
   .ww-chat-input-row {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: flex-end;
     width: 100%;
+    box-sizing: border-box;
   }
   .ww-chat-input {
     flex: 1;
-    border: 1.5px solid #e5e7eb;
+    min-width: 0;
+    border: 1.5px solid rgba(255,255,255,0.12);
     border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 14px;
-    font-family: 'DM Sans', sans-serif;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
     resize: none;
     outline: none;
     line-height: 1.5;
     max-height: 120px;
     overflow-y: auto;
     transition: border-color 0.15s;
+    box-sizing: border-box;
+    width: 100%;
   }
-  .ww-chat-input:focus { border-color: #1e3448; }
+  .ww-chat-input::placeholder { color: rgba(255,255,255,0.3); }
+  .ww-chat-input:focus {
+    border-color: rgba(212,168,67,0.5);
+    background: rgba(255,255,255,0.08);
+  }
   .ww-chat-send {
-    width: 40px;
-    height: 40px;
-    background: #0f1a24;
-    color: white;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: #d4a843;
+    color: #0f1a24;
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     font-size: 18px;
     cursor: pointer;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    font-weight: 800;
+    transition: all 0.15s;
   }
-  .ww-chat-send:hover { background: #1e3448; }
-  .ww-chat-send:disabled { background: #e5e7eb; cursor: default; }
+  .ww-chat-send:hover { background: #e8b94a; transform: scale(1.05); }
+  .ww-chat-send:disabled {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.3);
+    cursor: default;
+    transform: none;
+  }
   .ww-chat-disclaimer {
     font-size: 11px;
-    color: #9ca3af;
+    color: rgba(255,255,255,0.25);
     text-align: center;
     margin-top: 8px;
+  }
+
+  /* Bill type selector (FIX 2) */
+  .bill-type-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.8);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .bill-type-btn.active {
+    background: rgba(212,168,67,0.15);
+    border-color: #d4a843;
+    color: #d4a843;
+    font-weight: 600;
+  }
+  .bill-type-btn:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* Upload zone validation states (FIX 7) */
+  .upload.ww-valid {
+    border-color: rgba(34,197,94,0.55) !important;
+    background: rgba(34,197,94,0.06);
+  }
+  .upload.ww-invalid {
+    border-color: rgba(239,68,68,0.55) !important;
+    background: rgba(239,68,68,0.06);
+  }
+  .ww-validation-msg {
+    margin-top: 10px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .ww-validation-msg.ok { color: #4ade80; }
+  .ww-validation-msg.bad { color: #f87171; }
+  .ww-validation-msg.neutral { color: rgba(255,255,255,0.7); }
+
+  /* Floating chat launcher (FIX 9 — restyled for AI-branded prominence) */
+  #wwFloatingChatBtn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: linear-gradient(135deg, #1e3448 0%, #0f1a24 100%);
+    color: #ffffff;
+    border: 1.5px solid rgba(212,168,67,0.4);
+    border-radius: 16px;
+    padding: 14px 20px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(212,168,67,0.1);
+    display: none;
+    align-items: center;
+    gap: 10px;
+    z-index: 100;
+    transition: all 0.2s;
+    min-width: 180px;
+    letter-spacing: -0.1px;
+  }
+  #wwFloatingChatBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(212,168,67,0.3);
+    border-color: rgba(212,168,67,0.6);
+  }
+  #wwFloatingChatBtn:active {
+    transform: scale(0.98);
+  }
+  @media (max-width: 480px) {
+    #wwFloatingChatBtn {
+      bottom: 16px !important;
+      right: 16px !important;
+      padding: 12px 18px !important;
+      font-size: 13px !important;
+      min-width: 160px !important;
+    }
+  }
+
+  /* Chat screen wrapper (FIX 4) — needs to fully escape the .screen padding/margin
+     so the fixed-position #wwChatScreen can occupy the full viewport without gaps. */
+  #screen-chat { padding: 0 !important; margin: 0 !important; }
+  #screen-chat.active {
+    display: flex !important;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
   }
 </style>
 </head>
@@ -2404,6 +2531,10 @@
           <h2 class="step-title">Tell us about your household.</h2>
           <p class="step-sub">We use this to check program eligibility — income-based programs like CARE or LIHEAP often go unclaimed.</p>
           <div class="field">
+            <label>Your first name</label>
+            <input class="input" type="text" id="wwFirstName" placeholder="First name" autocomplete="given-name" />
+          </div>
+          <div class="field">
             <label>Email address</label>
             <input class="input" type="email" id="wwEmail" placeholder="you@email.com" autocomplete="email" />
             <div class="hint">We'll send your analysis here when it's verified — usually within an hour.</div>
@@ -2478,14 +2609,24 @@
             <p style="margin-top:12px; font-size:12.5px; color:var(--ink-400);">Here's what we'll look for in yours →</p>
           </div>
 
+          <div class="field">
+            <label>What type of bill are you uploading?</label>
+            <div class="bill-type-options" id="wwBillTypeOptions" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+              <button type="button" class="bill-type-btn active" data-type="electricity" onclick="wwSelectBillType(this)">⚡ Electricity</button>
+              <button type="button" class="bill-type-btn" data-type="internet" onclick="wwSelectBillType(this)">📶 Internet / Cable</button>
+              <button type="button" class="bill-type-btn" data-type="gas" onclick="wwSelectBillType(this)">🔥 Gas</button>
+              <button type="button" class="bill-type-btn" data-type="combined" onclick="wwSelectBillType(this)">📄 Combined / Other</button>
+            </div>
+          </div>
+
           <div class="upload" id="uploadZone" tabindex="0" role="button">
-            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.csv" style="display:none;" />
+            <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png,.csv" multiple style="display:none;" />
             <div class="up-icon">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
-            <h4 id="uploadHeading">Drop your bill here or click to upload</h4>
+            <h4 id="uploadHeading">Upload your bills (up to 10 files)</h4>
             <p>We read every line against the actual tariff schedule.</p>
-            <div class="formats">Accepts: PDF · JPG · PNG · CSV · 10MB max</div>
+            <div class="formats">Accepts: PDF · JPG · PNG · CSV · 10MB per file · Up to 10 files</div>
           </div>
           <div class="or-pull">
             or <b>paste your account number</b> for automatic data pull <span style="color:var(--ink-500);">(coming soon via Arcadia integration)</span>
@@ -2818,6 +2959,21 @@
 
     </div>
   </div>
+
+  <!-- FIX 9 — Always-visible "Ask WattWise" launcher on the results screen.
+       Lives inside #screen-results but is position:fixed so it floats over the
+       scroll. goToScreen() toggles display so it never appears on other screens. -->
+  <button
+    id="wwFloatingChatBtn"
+    type="button"
+    onclick="wwOpenChat(null)"
+    aria-label="Ask WattWise AI about your bill">
+    <span style="font-size:18px;">⚡</span>
+    <div style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;">
+      <span style="font-size:13px;font-weight:800;letter-spacing:0.02em;">Ask WattWise AI</span>
+      <span style="font-size:11px;color:rgba(255,255,255,0.55);font-weight:400;">About your bill</span>
+    </div>
+  </button>
 </div>
 
 <!-- ============================================================
@@ -2956,7 +3112,20 @@
       // just flip the fixed-position inner wrapper between flex and none.
       const _wwChatInner = document.getElementById('wwChatScreen');
       if (_wwChatInner) {
-        _wwChatInner.style.display = (name === 'chat') ? 'flex' : 'none';
+        if (name === 'chat') {
+          _wwChatInner.style.display = 'flex';
+          _wwChatInner.style.flexDirection = 'column';
+          _wwChatInner.style.height = '100%';
+          _wwChatInner.style.width = '100%';
+        } else {
+          _wwChatInner.style.display = 'none';
+        }
+      }
+
+      // FIX 9 — Floating "Ask WattWise" launcher is only visible on results.
+      const _wwChatBtn = document.getElementById('wwFloatingChatBtn');
+      if (_wwChatBtn) {
+        _wwChatBtn.style.display = (name === 'results') ? 'flex' : 'none';
       }
     };
 
@@ -3099,6 +3268,255 @@
     file: null,
   };
 
+  // FIX 2 — selected bill type (electricity | internet | gas | combined)
+  let wwSelectedBillType = 'electricity';
+  function wwSelectBillType(btn) {
+    document.querySelectorAll('.bill-type-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    wwSelectedBillType = btn.dataset.type;
+  }
+
+  // FIX 3 — global storing the bill_type of the currently-displayed analysis
+  let wwCurrentBillType = 'electricity';
+
+  /* ------------------------------------------------------------
+     FIX 7 — instant file validation feedback.
+     Runs a 1-shot Sonar call as soon as the user picks a file, so we can tell
+     them right away whether it looks like a utility bill. Never blocks the
+     submit button on transport errors / timeouts — only on a confirmed
+     "not a utility bill" verdict. Uses sonar (chat/completions) for speed,
+     NOT the Agent API.
+     ------------------------------------------------------------ */
+  function wwReadFileAsDataURL(f) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = () => resolve(r.result);
+      r.onerror = () => reject(r.error || new Error('read_failed'));
+      r.readAsDataURL(f);
+    });
+  }
+
+  function wwSetUploadValidationUI(kind, opts) {
+    // kind: 'loading' | 'valid' | 'invalid' | 'neutral' | 'clear'
+    const dz = document.getElementById('uploadZone');
+    const heading = document.getElementById('uploadHeading');
+    const nextBtn = document.getElementById('nextBtn');
+    let msg = document.getElementById('wwValidationMsg');
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.id = 'wwValidationMsg';
+      msg.className = 'ww-validation-msg';
+      if (dz && dz.parentNode) dz.parentNode.insertBefore(msg, dz.nextSibling);
+    }
+    if (dz) dz.classList.remove('ww-valid', 'ww-invalid');
+    msg.classList.remove('ok', 'bad', 'neutral');
+
+    if (kind === 'loading') {
+      // FIX 3 — multi-file aware loading label.
+      const count = (opts && typeof opts.count === 'number') ? opts.count : 1;
+      if (heading) {
+        heading.textContent = count > 1
+          ? 'Reading your bills… (' + count + ' files)'
+          : 'Reading your bill…';
+      }
+      msg.classList.add('neutral');
+      msg.textContent = '';
+      if (nextBtn) { nextBtn.disabled = true; }
+      return;
+    }
+    if (kind === 'valid' || kind === 'success') {
+      // FIX (May 22 2026) — 'success' kind is used by the PDF short-circuit
+      // path, which trusts the user's bill-type selection and passes
+      // { provider, type } instead of a pre-built { label }. Both kinds end
+      // up with a green border + checkmark message.
+      if (dz) dz.classList.add('ww-valid');
+      msg.classList.add('ok');
+      let label;
+      if (opts && opts.label) {
+        label = opts.label;
+      } else if (opts && opts.provider) {
+        label = String(opts.provider) + ' bill ready to analyze';
+      } else {
+        label = 'Utility bill detected';
+      }
+      msg.textContent = '✓ ' + label;
+      if (nextBtn) { nextBtn.disabled = false; }
+      return;
+    }
+    if (kind === 'invalid') {
+      if (dz) dz.classList.add('ww-invalid');
+      msg.classList.add('bad');
+      const reason = (opts && opts.reason) ? opts.reason : '';
+      msg.innerHTML =
+        '<strong>🚫 That doesn\'t look like a utility bill.</strong>' +
+        (reason ? '<br>' + String(reason).replace(/</g, '&lt;') : '') +
+        '<br>Please upload your electricity, internet, or gas bill.';
+      if (nextBtn) { nextBtn.disabled = true; }
+      return;
+    }
+    if (kind === 'neutral') {
+      msg.classList.add('neutral');
+      msg.textContent = 'Bill uploaded. Click Analyze to continue.';
+      if (nextBtn) { nextBtn.disabled = false; }
+      return;
+    }
+    if (kind === 'clear') {
+      msg.remove();
+      if (nextBtn) { nextBtn.disabled = false; }
+      return;
+    }
+  }
+
+  // Map a detected_type string back into one of our four button values.
+  function wwNormalizeDetectedType(t) {
+    if (!t) return null;
+    const s = String(t).toLowerCase();
+    if (s.includes('internet') || s.includes('cable') || s.includes('isp')) return 'internet';
+    if (s.includes('gas')) return 'gas';
+    if (s.includes('combined')) return 'combined';
+    if (s.includes('electric')) return 'electricity';
+    return null;
+  }
+
+  // Auto-select the bill type pill matching the validator's detected_type.
+  function wwAutoSelectBillType(detectedType) {
+    const norm = wwNormalizeDetectedType(detectedType);
+    if (!norm) return;
+    const btn = document.querySelector('.bill-type-btn[data-type="' + norm + '"]');
+    if (btn) wwSelectBillType(btn);
+  }
+
+  // Token to ignore stale validation responses (user picked a new file mid-flight).
+  let _wwValidateToken = 0;
+
+  async function wwValidateFileBeforeSubmit(file, fileCount) {
+    const myToken = ++_wwValidateToken;
+    // FIX 3 — pass the total selected count so the loading label can say
+    // "Reading your bills… (N files)". We still only validate the FIRST file.
+    wwSetUploadValidationUI('loading', { count: (typeof fileCount === 'number' ? fileCount : 1) });
+
+    // 8s overall timeout. On timeout / error, fall back to neutral (never block).
+    const ctrl = new AbortController();
+    const timeout = setTimeout(() => ctrl.abort(), 8000);
+
+    try {
+      const ext = (file.name.split('.').pop() || '').toLowerCase();
+      const isImage = ['jpg','jpeg','png','webp','gif'].includes(ext);
+      const count = (typeof fileCount === 'number' ? fileCount : 1);
+
+      // FIX (May 22 2026) — PDF/non-image short-circuit.
+      // Sonar can only "see" images. For PDFs / CSVs / unknown MIME types we
+      // used to send the bare filename as a text prompt, which fails when the
+      // filename is a content hash with no readable bill name. Instead, trust
+      // the user's explicit bill-type selection (the pill they picked above
+      // the upload zone) and show success immediately. AI validation only
+      // runs on images where it can actually classify the content.
+      const mime = (file.type || '').toLowerCase();
+      const isImageMime = mime.startsWith('image/');
+      if (mime === 'application/pdf' || mime === 'text/csv' || (!isImageMime && !isImage)) {
+        const providerLabel = wwSelectedBillType === 'internet' ? 'Internet/Cable'
+          : wwSelectedBillType === 'gas' ? 'Gas'
+          : wwSelectedBillType === 'combined' ? 'Combined utilities'
+          : 'Electricity';
+        wwSetUploadValidationUI('success', {
+          provider: providerLabel,
+          type: wwSelectedBillType,
+          count: count
+        });
+        // Belt-and-suspenders — enable any submit button on the page. The
+        // primary path uses the wizard's #nextBtn (handled inside
+        // wwSetUploadValidationUI), but legacy paths may have a dedicated
+        // analyze button.
+        const submitBtn = document.getElementById('wwAnalyzeBtn') ||
+          document.querySelector('button[onclick*="submitBill"]');
+        if (submitBtn) submitBtn.disabled = false;
+        clearTimeout(timeout);
+        return; // Skip AI validation for PDFs / non-image files
+      }
+
+      // Only reach AI validation for images (jpg, png, webp) where sonar can
+      // actually see the content.
+
+      // Build the message content. Sonar can read images via image_url, but
+      // not PDFs — for PDFs we send the filename + MIME hint as a text-only
+      // prompt, which is still useful signal (filenames usually leak provider).
+      const userPrompt =
+        "Look at this file. In one sentence, tell me: (a) what type of document is this, and (b) is it a utility bill (electricity, internet/cable, or gas)? " +
+        "Respond with strict JSON only \u2014 no prose, no code fence: " +
+        '{"is_utility_bill": true|false, "detected_type": "electricity"|"internet"|"gas"|"combined"|"unknown"|"not_a_bill", "detected_provider": "provider name or null", "reason": "one sentence explanation"}';
+
+      let content;
+      if (isImage) {
+        const dataUrl = await wwReadFileAsDataURL(file);
+        content = [
+          { type: 'text', text: userPrompt },
+          { type: 'image_url', image_url: { url: dataUrl } }
+        ];
+      } else {
+        // PDF / CSV: text-only prompt with filename context.
+        content = userPrompt + '\n\nFilename: ' + file.name + '\nMIME type: ' + (file.type || 'application/' + ext);
+      }
+
+      const resp = await fetch('https://api.perplexity.ai/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + window.WW_PERPLEXITY_KEY
+        },
+        signal: ctrl.signal,
+        body: JSON.stringify({
+          model: 'sonar',
+          messages: [
+            { role: 'system', content: 'You are a strict JSON classifier. Return ONLY the JSON object requested — no markdown, no prose.' },
+            { role: 'user', content: content }
+          ],
+          temperature: 0,
+          max_tokens: 200
+        })
+      });
+      clearTimeout(timeout);
+      if (myToken !== _wwValidateToken) return; // stale response — a newer file was picked
+      if (!resp.ok) throw new Error('http_' + resp.status);
+      const j = await resp.json();
+      const text = j?.choices?.[0]?.message?.content || '';
+      // Extract JSON object from the response — robust to occasional surrounding text.
+      let parsed = null;
+      try {
+        const m = text.match(/\{[\s\S]*\}/);
+        if (m) parsed = JSON.parse(m[0]);
+      } catch (_) {}
+      if (!parsed) {
+        // Could not parse — fail open.
+        wwSetUploadValidationUI('neutral');
+        return;
+      }
+
+      if (parsed.is_utility_bill === false) {
+        wwSetUploadValidationUI('invalid', { reason: parsed.reason });
+        return;
+      }
+
+      if (parsed.is_utility_bill === true) {
+        const norm = wwNormalizeDetectedType(parsed.detected_type) || 'utility';
+        const provider = parsed.detected_provider && String(parsed.detected_provider).toLowerCase() !== 'null'
+          ? String(parsed.detected_provider) : '';
+        const typeLabel = norm === 'utility' ? 'utility' : norm + ' bill';
+        const label = (provider ? provider + ' ' : '') + typeLabel + ' detected';
+        wwSetUploadValidationUI('valid', { label: label });
+        wwAutoSelectBillType(parsed.detected_type);
+        return;
+      }
+
+      // is_utility_bill missing / ambiguous — fail open.
+      wwSetUploadValidationUI('neutral');
+    } catch (err) {
+      clearTimeout(timeout);
+      if (myToken !== _wwValidateToken) return;
+      // Timeout or network error — never block the user.
+      wwSetUploadValidationUI('neutral');
+    }
+  }
+
   function initOnboarding() {
     // Populate state dropdown
     const states = ["Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut","Delaware","Florida","Georgia","Hawaii","Idaho","Illinois","Indiana","Iowa","Kansas","Kentucky","Louisiana","Maine","Maryland","Massachusetts","Michigan","Minnesota","Mississippi","Missouri","Montana","Nebraska","Nevada","New Hampshire","New Jersey","New Mexico","New York","North Carolina","North Dakota","Ohio","Oklahoma","Oregon","Pennsylvania","Rhode Island","South Carolina","South Dakota","Tennessee","Texas","Utah","Vermont","Virginia","Washington","West Virginia","Wisconsin","Wyoming"];
@@ -3155,16 +3573,35 @@
     ['dragover','dragenter'].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.add('drag'); }));
     ['dragleave','drop'].forEach(ev => dz.addEventListener(ev, (e) => { e.preventDefault(); dz.classList.remove('drag'); }));
     dz.addEventListener('drop', (e) => {
-      if (e.dataTransfer.files?.length) handleFile(e.dataTransfer.files[0]);
+      if (e.dataTransfer.files?.length) handleFiles(e.dataTransfer.files);
     });
     fi.addEventListener('change', (e) => {
-      if (e.target.files?.length) handleFile(e.target.files[0]);
+      if (e.target.files?.length) handleFiles(e.target.files);
     });
-    function handleFile(f) {
-      state.file = f;
+    // FIX 3 (May 22 2026) — multi-file upload. Up to 10 files. The first file
+    // remains the "primary" (used for legacy single-file references like
+    // state.file and the instant validation preview). All selected files are
+    // stashed in state.files and uploaded individually by submitBillToWattWise.
+    function handleFiles(fileList) {
+      if (!fileList || !fileList.length) return;
+      // Hard cap at 10 files. Extras are silently dropped.
+      const arr = Array.from(fileList).slice(0, 10);
+      state.files = arr;
+      state.file = arr[0]; // legacy single-file pointer
       dz.classList.add('has-file');
-      upHeading.textContent = '✓ ' + f.name;
+      dz.classList.remove('ww-valid', 'ww-invalid');
+      if (arr.length === 1) {
+        upHeading.textContent = '✓ ' + arr[0].name;
+      } else {
+        upHeading.textContent = '✓ ' + arr.length + ' files selected';
+      }
+      // FIX 7 — fire lightweight validation in parallel on the FIRST file only,
+      // for instant feedback. Never blocks UI. Pass the total count so the
+      // "loading" state can show "Reading your bills... (N files)".
+      try { wwValidateFileBeforeSubmit(arr[0], arr.length); } catch (_) {}
     }
+    // Back-compat alias — some older code paths may still call handleFile().
+    function handleFile(f) { handleFiles([f]); }
 
     // Text inputs
     document.getElementById('electric')?.addEventListener('input', e => state.electric = e.target.value);
@@ -3235,12 +3672,23 @@
       const _wwChatMessagesEl = document.getElementById('wwChatMessages');
       if (_wwChatMessagesEl) _wwChatMessagesEl.innerHTML = '';
       window.wwPendingScriptMessage = null;
+      // FIX 8 — clear the previous analysis pointers so the new submission
+      // is treated as a fresh run end-to-end.
+      try {
+        localStorage.removeItem('ww_active_analysis_id');
+        localStorage.removeItem('ww_active_household_id');
+      } catch (_) {}
     } catch (_) {}
     if (nextBtn) { nextBtn.disabled = true; nextBtn.textContent = 'Submitting…'; }
 
     try {
       if (!sb) throw new Error('Supabase client not loaded');
-      if (!state.file) {
+      // FIX 3 — multi-file submit. Use state.files (array, up to 10) if present;
+      // fall back to [state.file] for any legacy single-file code paths.
+      const filesToSubmit = (Array.isArray(state.files) && state.files.length)
+        ? state.files
+        : (state.file ? [state.file] : []);
+      if (!filesToSubmit.length) {
         alert('Please upload a bill first.');
         if (nextBtn) { nextBtn.disabled = false; nextBtn.textContent = 'Analyze My Bills →'; }
         window.WW_SUBMITTING = false;
@@ -3252,8 +3700,12 @@
       const _wwEmailVal = _wwEmailEl && _wwEmailEl.value
         ? _wwEmailEl.value.trim().toLowerCase()
         : null;
+      const _wwFirstNameEl = document.getElementById('wwFirstName');
+      const _wwFirstNameVal = _wwFirstNameEl && _wwFirstNameEl.value
+        ? _wwFirstNameEl.value.trim()
+        : '';
       const householdPayload = {
-        full_name: 'WattWise Web User',
+        full_name: _wwFirstNameVal || 'WattWise User',
         email: _wwEmailVal || null,
         state: state.state || 'TX',
         electricity_utility: state.electric || null,
@@ -3267,69 +3719,104 @@
         .from('ww_households').insert(householdPayload).select().single();
       if (hhErr) throw hhErr;
 
-      // 2) Upload file to storage
-      const file = state.file;
-      const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
-      const storagePath = `${household.id}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
-      const { error: upErr } = await sb.storage.from('bills').upload(storagePath, file, {
-        contentType: file.type || 'application/pdf', upsert: false
-      });
-      if (upErr) throw upErr;
-
-      // 3) Create bill upload record
+      // 2–4) Loop over every selected file: upload to storage, create a
+      // bill_uploads row, create an analyses row, and kick off the edge
+      // function. The FIRST file becomes the "primary" analysis used by the
+      // results poller / chat / WW_CONTEXT. Other files run in parallel and
+      // appear as separate rows in ww_analyses for the same household.
       const fileTypeMap = { pdf:'pdf', jpg:'jpg', jpeg:'jpg', png:'png', csv:'csv' };
-      const { data: upload, error: uplErr } = await sb.from('ww_bill_uploads').insert({
-        household_id: household.id,
-        file_name: file.name,
-        file_type: fileTypeMap[ext] || 'pdf',
-        storage_path: storagePath,
-        utility_type: 'electricity',
-        utility_name: state.electric || null,
-        upload_source: 'ui_upload',
-        processed: false
-      }).select().single();
-      if (uplErr) throw uplErr;
-
-      // 4) Pre-create the analyses record with status='pending'
-      //    (the edge function will update it to running/complete/computer_verified)
-      const { data: analysis, error: anErr } = await sb.from('ww_analyses').insert({
-        household_id: household.id,
-        analysis_type: 'residential',
-        status: 'pending',
-        run_by: 'web_ui'
-      }).select().single();
-      if (anErr) throw anErr;
-
-      // Stash IDs for the dashboard poller
-      window.WW_CONTEXT = { household_id: household.id, analysis_id: analysis.id, upload_id: upload.id, storage_path: storagePath };
-      try { localStorage.setItem('ww_last_analysis_id', analysis.id); } catch (_) {}
-
-      // 5) Move to analysis screen and kick off the edge function (fire-and-forget)
-      goToScreen('analysis');
-      const bill_content = `File: ${file.name}\nUtility: ${state.electric || 'unknown'}\nState: ${state.state || 'unknown'}\nMonthly bill estimate: $${state.bill || 'n/a'}\nStorage path: ${storagePath}\n(Bill PDF will be fetched from Supabase storage by Computer Operations during verification.)`;
+      const utilityType = wwSelectedBillType === 'internet' ? 'isp'
+        : (wwSelectedBillType === 'gas' ? 'gas'
+        : (wwSelectedBillType === 'combined' ? 'other' : 'electricity'));
       const household_context = `Household profile — utility: ${state.electric || 'unknown'}, ISP: ${state.isp || 'unknown'}, state: ${state.state || 'unknown'}, EV: ${!!state.ev}, solar: ${!!state.solar}, income: ${state.income || 'unknown'}, monthly bill ~ $${state.bill || 'n/a'}.`;
 
-      // Fire the edge function asynchronously — result will write back to ww_analyses.
-      // We pass analysis_id so the function UPDATES this row instead of creating
-      // a duplicate. We pass storage_path so it can fetch the bill image directly.
-      fetch(`${window.WW_SUPABASE_URL}/functions/v1/analyze-bill-v3`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${window.WW_SUPABASE_ANON_KEY}`,
-          'apikey': window.WW_SUPABASE_ANON_KEY
-        },
-        body: JSON.stringify({
+      let primaryAnalysis = null;
+      let primaryUpload = null;
+      let primaryStoragePath = null;
+      let primaryFile = null;
+
+      for (let i = 0; i < filesToSubmit.length; i++) {
+        const file = filesToSubmit[i];
+        const ext = (file.name.split('.').pop() || 'pdf').toLowerCase();
+        const storagePath = `${household.id}/${Date.now()}-${i}-${file.name.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+
+        const { error: upErr } = await sb.storage.from('bills').upload(storagePath, file, {
+          contentType: file.type || 'application/pdf', upsert: false
+        });
+        if (upErr) throw upErr;
+
+        const { data: upload, error: uplErr } = await sb.from('ww_bill_uploads').insert({
           household_id: household.id,
-          analysis_id: analysis.id,
+          file_name: file.name,
+          file_type: fileTypeMap[ext] || 'pdf',
           storage_path: storagePath,
-          bill_content,
-          household_context
+          utility_type: utilityType,
+          utility_name: state.electric || null,
+          upload_source: 'ui_upload',
+          processed: false
+        }).select().single();
+        if (uplErr) throw uplErr;
+
+        const { data: analysis, error: anErr } = await sb.from('ww_analyses').insert({
+          household_id: household.id,
+          analysis_type: 'residential',
+          status: 'pending',
+          run_by: 'web_ui',
+          bill_type: wwSelectedBillType
+        }).select().single();
+        if (anErr) throw anErr;
+
+        if (i === 0) {
+          primaryAnalysis = analysis;
+          primaryUpload = upload;
+          primaryStoragePath = storagePath;
+          primaryFile = file;
+        }
+
+        // Kick off the edge function for THIS file (fire-and-forget). Each row
+        // is updated independently by its own analyze-bill-v3 invocation.
+        const bill_content = `File: ${file.name}\nUtility: ${state.electric || 'unknown'}\nState: ${state.state || 'unknown'}\nMonthly bill estimate: $${state.bill || 'n/a'}\nStorage path: ${storagePath}\n(Bill PDF will be fetched from Supabase storage by Computer Operations during verification.)`;
+        fetch(`${window.WW_SUPABASE_URL}/functions/v1/analyze-bill-v3`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${window.WW_SUPABASE_ANON_KEY}`,
+            'apikey': window.WW_SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            household_id: household.id,
+            analysis_id: analysis.id,
+            storage_path: storagePath,
+            bill_type: wwSelectedBillType,
+            bill_content,
+            household_context
+          })
         })
-      })
-        .then(r => r.json().catch(() => ({})))
-        .then(payload => { console.log('analyze-bill-v3 payload:', payload); })
-        .catch(err => console.warn('analyze-bill-v3 kickoff failed (non-fatal):', err));
+          .then(r => r.json().catch(() => ({})))
+          .then(payload => { console.log('analyze-bill-v3 payload (file ' + (i+1) + '/' + filesToSubmit.length + '):', payload); })
+          .catch(err => console.warn('analyze-bill-v3 kickoff failed (non-fatal):', err));
+      }
+
+      // Stash IDs for the dashboard poller (uses the PRIMARY / first analysis).
+      window.WW_CONTEXT = { household_id: household.id, analysis_id: primaryAnalysis.id, upload_id: primaryUpload.id, storage_path: primaryStoragePath };
+      // FIX 8 — persist primary analysis ID across page loads (new + legacy
+      // keys) and mirror into the module-scope globals so wwHasActiveAnalysis()
+      // and the chat / modal flows pick them up immediately.
+      try {
+        localStorage.setItem('ww_active_analysis_id', primaryAnalysis.id);
+        localStorage.setItem('ww_active_household_id', household.id);
+        localStorage.setItem('ww_last_analysis_id', primaryAnalysis.id); // legacy key, kept in sync
+      } catch (_) {}
+      wwCurrentAnalysisId = primaryAnalysis.id;
+      wwCurrentHouseholdId = household.id;
+
+      // FIX 6 — fire the "bill received" email ONCE per submission (not per
+      // file). Use the primary analysis id; the email is fire-and-forget.
+      try { wwSendSubmissionEmail(primaryAnalysis.id, household.id); } catch (_) {}
+
+      // 5) Move to analysis screen. All edge function calls have already been
+      // dispatched in the loop above; results will write back per-row.
+      goToScreen('analysis');
       // Submit succeeded — keep the in-flight flag set so the user cannot
       // re-trigger from this screen. They have already moved past step 5.
     } catch (err) {
@@ -3351,12 +3838,63 @@
   let _wwPollTimer = null;
   let _wwRealFindingsApplied = false;
 
+  // Statuses that represent a real, in-flight or completed user analysis. When the
+  // current ww_analyses row has any of these statuses we MUST show real-user UI —
+  // never the Azaad demo cards.
+  const WW_ACTIVE_STATUSES = new Set([
+    'pending', 'running', 'complete', 'computer_verified', 'human_review'
+  ]);
+
   // True only when the user is viewing the results of their own submitted bill.
   // The /#results screen is also reachable as a public demo from the landing page;
   // in demo mode we leave the hardcoded Azaad/Irving content untouched.
+  //
+  // FIX 4 — also returns true when the latest analysis is in 'human_review'.
+  // FIX 8 — bulletproof: check in-memory wwCurrentAnalysisId, then localStorage
+  // (both the new ww_active_analysis_id key and the legacy ww_last_analysis_id
+  // key). Rehydrate wwCurrentAnalysisId / wwCurrentHouseholdId from storage so
+  // every downstream consumer (chat, poller, modal) gets the right IDs on a
+  // fresh page load.
   function wwHasActiveAnalysis() {
-    if (window.WW_CONTEXT && window.WW_CONTEXT.analysis_id) return true;
-    try { return !!localStorage.getItem('ww_last_analysis_id'); } catch (_) { return false; }
+    // Check 1: stored analysis ID in memory
+    if (typeof wwCurrentAnalysisId !== 'undefined'
+        && wwCurrentAnalysisId
+        && wwCurrentAnalysisId !== 'demo-analysis-azaad') {
+      return true;
+    }
+
+    // Check 2: localStorage backup (new key, falling back to legacy key).
+    try {
+      let stored = localStorage.getItem('ww_active_analysis_id');
+      let storedHh = localStorage.getItem('ww_active_household_id');
+      if (!stored) {
+        // Legacy key from earlier builds — still treat as a real analysis.
+        const legacy = localStorage.getItem('ww_last_analysis_id');
+        if (legacy && legacy !== 'demo-analysis-azaad') stored = legacy;
+      }
+      if (stored && stored !== 'demo-analysis-azaad') {
+        if (typeof wwCurrentAnalysisId !== 'undefined') wwCurrentAnalysisId = stored;
+        if (storedHh && typeof wwCurrentHouseholdId !== 'undefined') wwCurrentHouseholdId = storedHh;
+        // Also rehydrate window.WW_CONTEXT so the poller can pick up the IDs.
+        if (!window.WW_CONTEXT) window.WW_CONTEXT = {};
+        window.WW_CONTEXT.analysis_id = window.WW_CONTEXT.analysis_id || stored;
+        if (storedHh) window.WW_CONTEXT.household_id = window.WW_CONTEXT.household_id || storedHh;
+        return true;
+      }
+    } catch (_) {}
+
+    // Last-resort: window.WW_CONTEXT might still hold the IDs even if storage failed.
+    if (window.WW_CONTEXT && window.WW_CONTEXT.analysis_id
+        && window.WW_CONTEXT.analysis_id !== 'demo-analysis-azaad') {
+      return true;
+    }
+
+    return false;
+  }
+
+  // Helper: is this status a real, user-owned analysis status?
+  function wwIsActiveStatus(s) {
+    return !!(s && WW_ACTIVE_STATUSES.has(String(s)));
   }
 
   // US state code → short location label (e.g. 'NC' → 'North Carolina')
@@ -3377,15 +3915,35 @@
     return WW_STATE_NAMES[up] || s;
   }
 
-  // FIX 1 — update the results bar with the user's actual location + utility.
-  function wwApplyUserContextToResultsBar() {
+  // Pick the right provider label given the bill type + household context.
+  // Falls back gracefully when the user didn't fill in the matching utility field.
+  function wwProviderForBillType(billType, household) {
+    const h = household || {};
+    if (billType === 'internet') {
+      return h.isp_provider || state.isp || 'Internet / Cable provider';
+    }
+    if (billType === 'gas') {
+      return h.gas_utility || 'Gas utility';
+    }
+    if (billType === 'combined') {
+      return 'Multiple utilities';
+    }
+    // electricity (default)
+    return h.electricity_utility || state.electric || 'Electricity utility';
+  }
+
+  // FIX 1 + FIX 3 — update the results bar with the user's actual location + provider
+  // matching the uploaded bill_type.
+  function wwApplyUserContextToResultsBar(household) {
     if (!wwHasActiveAnalysis()) return;
     const locEl = document.getElementById('wwResLocation');
     const utilEl = document.getElementById('wwResUtility');
     const periodEl = document.getElementById('wwResPeriod');
-    const stateName = wwPrettyState(state.state);
+    const stateName = wwPrettyState((household && household.state) || state.state);
     if (locEl && stateName) locEl.textContent = stateName;
-    if (utilEl && state.electric) utilEl.textContent = state.electric;
+    if (utilEl) {
+      utilEl.textContent = wwProviderForBillType(wwCurrentBillType, household);
+    }
     // Bill period is unknown until verification — hide the placeholder Mar 12 – Apr 11 range.
     if (periodEl) periodEl.style.display = 'none';
   }
@@ -3395,6 +3953,99 @@
     const banner = document.getElementById('wwSampleBanner');
     if (!banner) return;
     banner.style.display = show ? 'block' : 'none';
+  }
+
+  // Helper used by the "Upload a different bill" CTA on the data_issue error
+  // card. Clears the active analysis pointers so the next submission is treated
+  // as a brand-new run, then sends the user back to the upload step.
+  function wwRestartUpload() {
+    try {
+      localStorage.removeItem('ww_last_analysis_id');
+      localStorage.removeItem('ww_active_analysis_id');
+      localStorage.removeItem('ww_active_household_id');
+    } catch (_) {}
+    wwCurrentAnalysisId = null;
+    wwCurrentHouseholdId = null;
+    window.WW_CONTEXT = null;
+    window.WW_SUBMITTING = false;
+    state.file = null;
+    state.files = []; // FIX 3 — clear multi-file selection too
+    const dz = document.getElementById('uploadZone');
+    if (dz) {
+      dz.classList.remove('has-file', 'ww-valid', 'ww-invalid');
+    }
+    const upHeading = document.getElementById('uploadHeading');
+    if (upHeading) upHeading.textContent = 'Upload your bills (up to 10 files)';
+    const vmsg = document.getElementById('wwValidationMsg');
+    if (vmsg) vmsg.remove();
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) { nextBtn.disabled = false; nextBtn.textContent = 'Analyze My Bills →'; }
+    goToScreen('onboarding');
+    try { showStep(5); } catch (_) {}
+  }
+
+  // FIX 5 — swap the demo cards for a human-friendly "we couldn't read this
+  // bill" error when the analysis is in human_review state with a data_issue
+  // finding. Lets the user try again instead of staring at confusing demo data.
+  function wwShowUploadError(message) {
+    // FIX (May 22 2026) — hide all demo visual sections on the results screen
+    // so the error panel stands alone. The 4 top metric cards (.metrics), the
+    // donut + bill-anatomy bento (.bento-2), and the sample banner all show
+    // hardcoded Marcus/Irving TX demo data and must not be visible when we're
+    // telling the user "we couldn't read this bill".
+    const sectionsToHide = [
+      '.metrics',          // top stat cards: Annual savings / Critical finding / Next alert / Monitoring
+      '.bento-2',          // donut chart + bill-anatomy two-up grid
+      '#wwBillSummaryCards',
+      '#wwDonutSection',
+      '#wwBillAnatomy',
+      '.bill-summary-cards',
+      '.donut-section',
+      '.bill-anatomy',
+      '.results-summary',
+      '.summary-cards',
+      '.results-stats',
+      '.results-top-cards'
+    ];
+    sectionsToHide.forEach(function (selector) {
+      document.querySelectorAll(selector).forEach(function (el) {
+        el.style.display = 'none';
+      });
+    });
+
+    // Hide the sample banner so it doesn't contradict the error.
+    const banner = document.getElementById('wwSampleBanner');
+    if (banner) banner.style.display = 'none';
+
+    // Belt-and-suspenders: also hide any leftover demo cards whose text still
+    // references the Marcus/Irving demo values, in case future demo content
+    // lives outside .metrics / .bento-2.
+    try {
+      const demoFingerprints = ['$1,322', 'Surge Protect', 'Oct 16, 2026', 'Month 1 of 12'];
+      document.querySelectorAll('.metric, .stat-card, .card.metric, [class*="stat-card"]').forEach(function (el) {
+        const t = el.textContent || '';
+        if (demoFingerprints.some(function (fp) { return t.indexOf(fp) !== -1; })) {
+          el.style.display = 'none';
+        }
+      });
+    } catch (_) {}
+
+    const container = document.getElementById('wwFindings');
+    if (!container) return;
+
+    const safeMessage = (typeof message === 'string' && message.trim())
+      ? message
+      : "We couldn't read a utility bill from this file.";
+
+    container.innerHTML =
+      '<div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:24px;margin:16px 0;text-align:center;">' +
+        '<div style="font-size:32px;margin-bottom:12px;">🔍</div>' +
+        '<h3 style="color:#ffffff;font-size:17px;font-weight:700;margin:0 0 8px;">We couldn\'t read this bill</h3>' +
+        '<p style="color:rgba(255,255,255,0.65);font-size:14px;line-height:1.6;margin:0 0 20px;">' +
+          safeMessage.replace(/</g, '&lt;') +
+        '</p>' +
+        '<button onclick="wwRestartUpload()" style="background:#d4a843;color:#0f1a24;border:none;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Upload a different bill →</button>' +
+      '</div>';
   }
 
   // FIX 2 — confidence/analyzing badge.
@@ -3656,9 +4307,41 @@
     );
   }
 
+  // Hardcoded fallbacks for follow-up chips when the Agent doesn't return
+  // follow_up_questions. Keyed by bill_type so each utility surfaces the
+  // right disputes / win categories.
+  const WW_DEFAULT_FOLLOWUPS = {
+    internet: [
+      "Am I paying too much for my internet speed?",
+      "Can I get rid of the equipment rental fee?",
+      "Is my promotional rate about to expire?"
+    ],
+    electricity: [
+      "What rate plan would save me the most?",
+      "Are there any programs I qualify for?",
+      "Why was my bill higher than usual?"
+    ],
+    gas: [
+      "Is my gas rate competitive?",
+      "Are there efficiency programs I qualify for?",
+      "What's causing my highest charges?"
+    ],
+    combined: [
+      "What's the biggest waste on my bill?",
+      "Which charges should I dispute first?",
+      "What's the fastest win I can get today?"
+    ]
+  };
+
   // Render the follow-up chips section from raw_json.follow_up_questions.
+  // Falls back to WW_DEFAULT_FOLLOWUPS[bill_type] when the Agent payload
+  // omits or empties the questions array (common w/ current Agent runs).
   function wwBuildFollowupChips(raw) {
-    const qs = (raw && Array.isArray(raw.follow_up_questions)) ? raw.follow_up_questions : [];
+    let qs = (raw && Array.isArray(raw.follow_up_questions)) ? raw.follow_up_questions : [];
+    if (!qs.length) {
+      const bt = (typeof wwCurrentBillType === 'string' && wwCurrentBillType) ? wwCurrentBillType : 'electricity';
+      qs = WW_DEFAULT_FOLLOWUPS[bt] || WW_DEFAULT_FOLLOWUPS.electricity;
+    }
     if (!qs.length) return '';
     const chips = qs.map(q => {
       const safe = wwEscape(String(q || '').trim());
@@ -3685,6 +4368,16 @@
     const raw = data && data.raw_json;
     const findings = raw && Array.isArray(raw.findings) ? raw.findings : null;
     if (!findings || findings.length === 0) return;
+
+    // Hide demo donut + 4 stat cards + sample banner once we have real findings.
+    // The .metrics row, .bento-2 (donut + bill anatomy), and #wwSampleBanner are
+    // demo-only scaffolding that should never appear next to real analysis data.
+    try {
+      document.querySelectorAll('.metrics').forEach(el => { el.style.display = 'none'; });
+      document.querySelectorAll('.bento-2').forEach(el => { el.style.display = 'none'; });
+      const _wwSampleBanner = document.getElementById('wwSampleBanner');
+      if (_wwSampleBanner) _wwSampleBanner.style.display = 'none';
+    } catch (_) { /* non-fatal */ }
 
     // Cache analysis context for modal, Supabase writes, and PostHog.
     wwStoreAnalysisData(raw, data && (data.household_id || (raw && raw.household_id)) || null,
@@ -4139,10 +4832,17 @@ Ask me anything \u2014 "what if they push back", "how do I ask for the refund", 
       try { goToScreen('chat'); } catch (_) {}
     }
 
-    // Set subtitle with household name
+    // Set subtitle — prefer raw_json fields first, then the active context,
+    // then a neutral fallback. raw_json.household_name is frequently null on
+    // fresh analyses, so we now also try raw_json.name and the WW_CONTEXT
+    // household full_name before defaulting.
     const subtitle = document.getElementById('wwChatSubtitle');
-    if (subtitle && wwCurrentRawJson) {
-      subtitle.textContent = wwCurrentRawJson.household_name || 'Your household';
+    if (subtitle) {
+      subtitle.textContent =
+        (wwCurrentRawJson && wwCurrentRawJson.household_name) ||
+        (wwCurrentRawJson && wwCurrentRawJson.name) ||
+        (window.WW_CONTEXT && window.WW_CONTEXT.household && window.WW_CONTEXT.household.full_name) ||
+        'Your bill';
     }
 
     // Show welcome OR pending script message
@@ -4250,14 +4950,15 @@ RULES FOR YOUR RESPONSES:
   }
 
   // ─── WELCOME MESSAGE ──────────────────────
+  // No more awkward "Hi there!" greeting when household_name is null. The
+  // welcome now leads with what was analyzed and how many findings were
+  // surfaced, and uses the provider hint when the bill is an internet bill.
   function wwChatShowWelcome() {
-    const name = wwCurrentRawJson ? (wwCurrentRawJson.household_name || 'there') : 'there';
-    const savings = wwCurrentRawJson ? wwCurrentRawJson.savings_opportunity_annual_estimate : 0;
-
-    const welcome = savings > 0
-      ? `Hi ${name}! I've analyzed your bill and found $${savings}/year in potential savings. I know everything about your specific findings. What would you like to know?`
-      : `Hi ${name}! I've analyzed your bill. Ask me anything about what I found.`;
-
+    const billType = (typeof wwCurrentBillType === 'string' && wwCurrentBillType) ? wwCurrentBillType : 'electricity';
+    const findings = (wwCurrentRawJson && Array.isArray(wwCurrentRawJson.findings)) ? wwCurrentRawJson.findings : [];
+    const findingCount = findings.length;
+    const providerHint = (billType === 'internet') ? 'Xfinity ' : '';
+    const welcome = `I've analyzed your ${providerHint}bill and found ${findingCount} thing${findingCount !== 1 ? 's' : ''} worth your attention. What would you like to know?`;
     wwChatAddMessage('assistant', welcome);
   }
 
@@ -4351,15 +5052,17 @@ RULES FOR YOUR RESPONSES:
         }
       }
 
-      // Call Perplexity API
-      const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      // FIX 1 — Route chat through Supabase chat-proxy edge function so the
+      // Perplexity API key never ships to the browser and CORS is handled
+      // server-side. The proxy returns { content } or, on partial failure,
+      // the original choices[] shape — accept both for resilience.
+      const response = await fetch(window.WW_SUPABASE_URL + '/functions/v1/chat-proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + window.WW_PERPLEXITY_KEY
+          'Authorization': 'Bearer ' + window.WW_SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
-          model: 'sonar',
           messages: [
             {
               role: 'system',
@@ -4367,13 +5070,14 @@ RULES FOR YOUR RESPONSES:
             },
             ...messages
           ],
-          max_tokens: 400,
-          temperature: 0.3
+          max_tokens: 500,
+          temperature: 0.2
         })
       });
 
       const data = await response.json();
-      const reply = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
+      const reply = (data && data.content)
+        || (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
         || 'I could not process that. Try again.';
 
       wwChatHideTyping();
@@ -4431,10 +5135,58 @@ RULES FOR YOUR RESPONSES:
     if (!id) return;
     try {
       const { data, error } = await sb.from('ww_analyses')
-        .select('id,status,confidence_score,savings_low,savings_high,raw_json,flag_for_review')
+        .select('id,status,confidence_score,savings_low,savings_high,raw_json,flag_for_review,bill_type,household_id')
         .eq('id', id).maybeSingle();
       if (error || !data) return;
-      if (data.status === 'computer_verified') {
+
+      // FIX 3 — capture the bill_type from the row so the results bar can
+      // pick the right provider label (ISP / gas / electricity / combined).
+      if (data.bill_type) wwCurrentBillType = data.bill_type;
+
+      // Pull the household record so we can show the actual provider name
+      // matching the bill_type (not always state.electric).
+      let _wwHousehold = null;
+      try {
+        const hhId = data.household_id || (window.WW_CONTEXT && window.WW_CONTEXT.household_id);
+        if (hhId) {
+          const { data: hh } = await sb.from('ww_households')
+            .select('full_name,email,state,electricity_utility,isp_provider,gas_utility')
+            .eq('id', hhId).maybeSingle();
+          _wwHousehold = hh || null;
+        }
+      } catch (_) {}
+      // Re-apply the results bar each poll so the provider/state shown is
+      // always up to date with the latest analysis row + household record.
+      try { wwApplyUserContextToResultsBar(_wwHousehold); } catch (_) {}
+
+      // FIX 4 + FIX 5 — human_review handling.
+      // A real analysis exists, so we must NEVER fall back to demo cards.
+      if (data.status === 'human_review') {
+        setVerifyBadge('preliminary');
+        const raw = data.raw_json || {};
+        const findings = Array.isArray(raw.findings) ? raw.findings : [];
+        const dataIssue = findings.find(f => f && f.type === 'data_issue');
+        if (dataIssue) {
+          wwShowUploadError(dataIssue.description || "We couldn't read a utility bill from this file.");
+          wwStopPolling();
+        } else if (findings.length > 0) {
+          // Low confidence but real findings — show them anyway.
+          wwApplyRealFindings(data);
+          if (typeof data.confidence_score === 'number') wwSetConfidenceScore(data.confidence_score);
+          wwSetSampleBanner(false);
+          wwStopPolling();
+        } else {
+          // No findings yet — stay in analyzing UI.
+          wwSetSampleBanner(true);
+        }
+        return;
+      }
+
+      // FIX 1 (May 22 2026) — Agent API now returns status 'complete' with
+      // confidence ≥ 70 instead of/in addition to 'computer_verified'. Treat
+      // both as terminal-success: show real findings, flip the badge to
+      // "✓ Verified", fire the verification email, and stop polling.
+      if (data.status === 'computer_verified' || data.status === 'complete') {
         setVerifyBadge('verified');
         // FIX 4 — swap demo data for real findings when raw_json is present.
         if (data.raw_json && Array.isArray(data.raw_json.findings) && data.raw_json.findings.length > 0) {
@@ -4458,6 +5210,32 @@ RULES FOR YOUR RESPONSES:
         // Keep the "⏳ Analyzing…" confidence chip until verified.
       }
     } catch (e) { console.warn('ww poll error', e); }
+  }
+
+  // FIX 6 — fire the "bill received" email Edge Function immediately on
+  // upload. Fire-and-forget, silent on failure — the UI must never block.
+  async function wwSendSubmissionEmail(analysisId, householdId) {
+    if (!analysisId || !householdId) return;
+    try {
+      await fetch(
+        window.WW_SUPABASE_URL + '/functions/v1/send-submission-email',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + window.WW_SUPABASE_ANON_KEY,
+            'apikey': window.WW_SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            analysis_id: analysisId,
+            household_id: householdId
+          })
+        }
+      );
+    } catch (err) {
+      console.log('Submission email failed:', err);
+      // Silent fail — never block UI.
+    }
   }
 
   // Fire the verification email Edge Function. Fire-and-forget — the UI must

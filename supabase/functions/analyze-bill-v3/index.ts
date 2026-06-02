@@ -35,6 +35,26 @@ Always output this exact JSON structure (and NOTHING else - no markdown, no pros
   "data_validation_notes": "any form vs bill contradictions found"
 }`;
 
+// FIX (May 22 2026) — per-bill-type context appended to the system prompt so
+// the Agent doesn't flag a provider/utility mismatch when the household's
+// electricity_utility field doesn't match the uploaded bill's provider (e.g.
+// user uploads an Xfinity internet bill but their household record lists a
+// Texas electricity utility).
+function billTypeSystemAddendum(billType: string | null | undefined): string {
+  const t = String(billType || "").toLowerCase();
+  if (t === "internet" || t === "isp" || t === "cable") {
+    return "\n\nThis is an INTERNET/ISP bill. Do NOT flag a mismatch if the provider is an ISP (Xfinity, Comcast, Verizon Fios, Spectrum, AT&T, Cox, CenturyLink, Frontier, T-Mobile Home Internet, etc.). Analyze it as an ISP bill using ISP Mode (Step 4 — promo expiry, add-ons, alternatives). The household electricity_utility field is for a different service and must be ignored for the provider-match check.";
+  }
+  if (t === "gas") {
+    return "\n\nThis is a GAS bill. Analyze accordingly. Do NOT flag a provider mismatch with the household's electricity_utility field — they are different services. Focus on gas usage, therms, delivery charges, and supplier rates.";
+  }
+  if (t === "combined") {
+    return "\n\nThis bill may contain multiple utility types (e.g. combined electricity + gas, or a bundled utility statement). Analyze ALL applicable line items. Do NOT flag a single-provider mismatch — multiple providers/services on one statement is expected.";
+  }
+  // electricity / other / unknown — keep existing behavior.
+  return "";
+}
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -93,6 +113,9 @@ Deno.serve(async (req) => {
   const household_context = body?.household_context;
   const incomingAnalysisId = body?.analysis_id;
   const incomingStoragePath = body?.storage_path;
+  // FIX (May 22 2026) — explicit bill_type from the client so the Agent
+  // knows which type to expect and doesn't flag ISP/gas bills as mismatches.
+  const billType = body?.bill_type ?? null;
 
   if (!household_id) {
     return jsonResponse({ success: false, error: "household_id is required" }, 400);
@@ -175,6 +198,12 @@ Deno.serve(async (req) => {
     }
   }
 
+  // FIX (May 22 2026) — append bill_type-specific guidance to the system
+  // prompt so the Agent skips the provider-mismatch flag for ISP/gas/combined
+  // bills (the household's electricity_utility field is for a different
+  // service in those cases).
+  const systemPrompt = WATTWISE_SKILL_PROMPT + billTypeSystemAddendum(billType);
+
   let pplxResp;
   try {
     pplxResp = await fetch("https://api.perplexity.ai/chat/completions", {
@@ -183,7 +212,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "sonar-pro",
         messages: [
-          { role: "system", content: WATTWISE_SKILL_PROMPT },
+          { role: "system", content: systemPrompt },
           { role: "user", content: userParts },
         ],
       }),
