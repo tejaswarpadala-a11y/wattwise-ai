@@ -16,19 +16,12 @@
   // WattWise <-> Supabase configuration (publishable anon key — safe in browser)
   window.WW_SUPABASE_URL = 'https://ilmjduriinjhayaayjpk.supabase.co';
   window.WW_SUPABASE_ANON_KEY = 'sb_publishable_oqiJMKqvI3Z88qysP4ibmw_OThOztdm';
-  // WattWise <-> Perplexity Agent API key — Tab 1 build May 18, 2026.
-  // Replace YOUR_PERPLEXITY_API_KEY_HERE with the actual key from
-  // https://www.perplexity.ai/settings/api . Powers wwGetCallScript().
-  window.WW_PERPLEXITY_KEY = 'YOUR_PERPLEXITY_API_KEY_HERE';
-
-  // WattWise <-> Resend — verification email build May 19, 2026.
-  // The actual send happens server-side in the send-verification-email Edge
-  // Function. These constants exist for diagnostics + future client-side use;
-  // never expose the Resend key in a real client-only fetch.
-  const WW_RESEND_KEY = 'YOUR_RESEND_API_KEY_HERE';
-  const WW_FROM_EMAIL = 'WattWise <hello@trywattwise.com>';
-  window.WW_RESEND_KEY = WW_RESEND_KEY;
-  window.WW_FROM_EMAIL = WW_FROM_EMAIL;
+  // NOTE: No third-party API keys (Perplexity, Resend) are ever placed in the
+  // browser. All Perplexity calls route through Supabase Edge Functions
+  // (chat-proxy, validate-bill-proxy, script-proxy) and all Resend email sends
+  // happen server-side (send-submission-email, send-verification-email). Those
+  // functions read PERPLEXITY_API_KEY / RESEND_API_KEY from Supabase secrets.
+  window.WW_FROM_EMAIL = 'WattWise <hello@trywattwise.com>';
 </script>
 
 <!-- PostHog product analytics — Tab 1 build May 18, 2026.
@@ -3457,28 +3450,23 @@
         content = userPrompt + '\n\nFilename: ' + file.name + '\nMIME type: ' + (file.type || 'application/' + ext);
       }
 
-      const resp = await fetch('https://api.perplexity.ai/chat/completions', {
+      // Route classification through the Supabase validate-bill-proxy edge
+      // function so the Perplexity API key never ships to the browser. The
+      // proxy returns { content } (or { content, error } on failure).
+      const resp = await fetch(window.WW_SUPABASE_URL + '/functions/v1/validate-bill-proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + window.WW_PERPLEXITY_KEY
+          'Authorization': 'Bearer ' + window.WW_SUPABASE_ANON_KEY
         },
         signal: ctrl.signal,
-        body: JSON.stringify({
-          model: 'sonar',
-          messages: [
-            { role: 'system', content: 'You are a strict JSON classifier. Return ONLY the JSON object requested — no markdown, no prose.' },
-            { role: 'user', content: content }
-          ],
-          temperature: 0,
-          max_tokens: 200
-        })
+        body: JSON.stringify({ content: content })
       });
       clearTimeout(timeout);
       if (myToken !== _wwValidateToken) return; // stale response — a newer file was picked
       if (!resp.ok) throw new Error('http_' + resp.status);
       const j = await resp.json();
-      const text = j?.choices?.[0]?.message?.content || '';
+      const text = j?.content || '';
       // Extract JSON object from the response — robust to occasional surrounding text.
       let parsed = null;
       try {
@@ -4515,19 +4503,18 @@
     } catch (_) {}
 
     try {
-      const response = await fetch('https://api.perplexity.ai/v1/agent', {
+      // Route script generation through the Supabase script-proxy edge
+      // function so the Perplexity API key never ships to the browser. The
+      // proxy forwards the raw agent response unchanged.
+      const response = await fetch(window.WW_SUPABASE_URL + '/functions/v1/script-proxy', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + window.WW_PERPLEXITY_KEY
+          'Authorization': 'Bearer ' + window.WW_SUPABASE_ANON_KEY
         },
         body: JSON.stringify({
-          system_prompt:
-            'You are the WattWise Negotiation Script Generator. ' +
-            'Load and apply the skill at: skills/user/wattwise-negotiation-script/SKILL.md. ' +
-            'Generate scripts for the finding with id: ' + findingId + '. ' +
-            'Return JSON exactly per the skill schema.',
-          user_message: JSON.stringify(wwCurrentRawJson || {})
+          finding_id: findingId,
+          raw_json: wwCurrentRawJson || {}
         })
       });
 

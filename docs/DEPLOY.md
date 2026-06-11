@@ -1,5 +1,23 @@
 # WattWise — Deployment Runbook
 
+## ⚠️ Secret-handling rules (read first)
+
+- **Never commit API keys.** No Perplexity, Resend, or service-role key may
+  ever appear in `src/index.html`, any committed file, or git history.
+- The browser only ever holds the **publishable** Supabase anon key
+  (`WW_SUPABASE_ANON_KEY`). That key is safe to ship to the client.
+- All Perplexity calls route through Supabase Edge Functions
+  (`chat-proxy`, `validate-bill-proxy`, `script-proxy`), which read
+  `PERPLEXITY_API_KEY` from Supabase secrets server-side.
+- All Resend email sends happen in Edge Functions
+  (`send-submission-email`, `send-verification-email`), which read
+  `RESEND_API_KEY` from Supabase secrets server-side.
+- Local `.env*` files are git-ignored — keep keys there for local work only.
+- If a key is ever exposed, **revoke it immediately** at the provider, rotate
+  the Supabase secret, and redeploy the affected functions.
+
+---
+
 ## Frontend (Vercel)
 
 The frontend is a single `src/index.html` file. Vercel project is
@@ -39,7 +57,7 @@ supabase functions deploy <slug> \
   --no-verify-jwt
 ```
 
-All six functions are deployed with `verify_jwt: false` because the frontend
+All functions are deployed with `verify_jwt: false` because the frontend
 calls them directly with the Supabase anon key as a bearer token — there's
 no per-user JWT context to validate.
 
@@ -48,15 +66,24 @@ no per-user JWT context to validate.
 Either via dashboard (Project Settings → Edge Functions → Secrets) or CLI:
 
 ```bash
-supabase secrets set PERPLEXITY_API_KEY=pplx-... \
+# Use your real keys here — NEVER paste them into a committed file.
+supabase secrets set PERPLEXITY_API_KEY="<your-perplexity-key>" \
   --project-ref ilmjduriinjhayaayjpk
 
-supabase secrets set RESEND_API_KEY=re_... \
+supabase secrets set RESEND_API_KEY="<your-resend-key>" \
   --project-ref ilmjduriinjhayaayjpk
 ```
 
 `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are auto-populated by
 Supabase and don't need to be set manually.
+
+**Functions that need `PERPLEXITY_API_KEY`**: `analyze-bill`,
+`analyze-bill-v3`, `chat-proxy`, `validate-bill-proxy`, `script-proxy`.
+**Functions that need `RESEND_API_KEY`**: `send-submission-email`,
+`send-verification-email`.
+
+No Perplexity or Resend key is ever set in Vercel — the frontend is static
+and only carries the publishable Supabase anon key.
 
 ---
 
