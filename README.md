@@ -2,95 +2,127 @@
 
 Live: **[trywattwise.com](https://trywattwise.com)**
 
-Perplexity Billion Dollar Build 2026.
+**Status: live pilot product; pilot metrics updated as of June 2026**
 
-WattWise reads household utility, gas, and internet bills, runs them against
-verified tariff data + an 8-step Perplexity Sonar pipeline, and returns
-structured findings (hidden fees, wrong rate plans, expired promos, etc.)
-with word-for-word call scripts for each one.
+Built for the Perplexity Billion Dollar Build 2026.
 
 ---
 
-## Stack
+## What WattWise is
+
+WattWise is a consumer web app that reads a household's utility, gas, or
+internet bill and tells the user exactly where they're overpaying — hidden
+fees, wrong rate plans, expired promotional rates, charges that survived a
+provider switch, and missed income-tested assistance programs. For every
+finding it produces a structured result and a word-for-word phone script the
+user can read to their provider to get the charge removed or refunded.
+
+The product is free to the end user. A bill goes in; a prioritized list of
+findings, dollar estimates, and ready-to-use call scripts comes out.
+
+---
+
+## Pilot status (June 2026)
+
+These are the canonical pilot figures. They appear once here and are kept
+consistent across the product UI.
+
+| Metric | Value |
+|---|---|
+| Households analyzed | 21 |
+| States covered | 14 |
+| Households in pipeline | 29 |
+| Confirmed outcomes | 7 |
+| Total refunded | $375 |
+| Identified annual savings | $1,657/year |
+
+These reflect an early pilot, not a productionized or scaled deployment.
+
+---
+
+## How it works
+
+1. The user answers a short onboarding flow and uploads a recent bill.
+2. The bill is stored in Supabase Storage and a row is created in Postgres.
+3. An edge function (`analyze-bill-v3`) sends the bill data to Perplexity
+   `sonar-pro` with a structured **8-step chain-of-thought system prompt**
+   (data validation → usage anomalies → charge anomalies → ISP promo check →
+   time-of-use eligibility → assistance-program eligibility → confidence
+   scoring → structured JSON output).
+4. The model returns structured findings, savings estimates, and call-script
+   content, which are persisted and rendered back to the user.
+5. Confirmation and "analysis ready" emails are sent server-side via Resend.
+
+> **Claim-safety note:** The "8-step pipeline" is a single, carefully
+> structured Perplexity `sonar-pro` chat completion guided by a multi-step
+> system prompt — it is **prompt-engineered chain-of-thought, not a RAG or
+> vector/embedding system.** There is no vector store, no embedding index, and
+> no retrieval-augmented generation in this codebase. The `ww_rates` table is a
+> plain SQL tariff cache, not a vector database. Please do not describe this
+> project as a shipped/productionized RAG system — that work is not present in
+> the code.
+
+---
+
+## Architecture
 
 | Layer | Tech |
 |---|---|
-| Frontend | Single-file `src/index.html` deployed to Vercel |
-| AI pipeline | Perplexity `sonar` / `sonar-pro` (chat + agent endpoints) |
-| Backend | Supabase Postgres + 6 Edge Functions (Deno) |
+| Frontend | Single-file static `src/index.html` deployed to Vercel |
+| AI | Perplexity `sonar` / `sonar-pro` via `chat/completions` |
+| Backend | Supabase Postgres + 8 Deno edge functions |
 | Storage | Supabase Storage (raw bill files) |
 | Email | Resend (`hello@trywattwise.com`) |
 | Analytics | PostHog |
 
----
-
-## Repo layout
-
 ```
 .
 ├── src/
-│   └── index.html                    # Production frontend (~5,650 lines)
+│   └── index.html                    # Production frontend (single file)
 ├── supabase/
 │   ├── functions/
-│   │   ├── analyze-bill/             # Legacy v1 analyzer (sonar agent)
+│   │   ├── analyze-bill/             # Legacy v1 analyzer (kept for compat)
 │   │   ├── analyze-bill-test/        # Health-check stub
-│   │   ├── analyze-bill-v3/          # PRODUCTION analyzer (bill_type-aware)
-│   │   ├── chat-proxy/               # Server-side Perplexity proxy for chat UI
-│   │   ├── validate-bill-proxy/      # Server-side Perplexity proxy for upload validation
-│   │   ├── script-proxy/             # Server-side Perplexity proxy for call-script generation
+│   │   ├── analyze-bill-v3/          # Production analyzer (bill_type-aware)
+│   │   ├── chat-proxy/               # Server-side Perplexity proxy (chat UI)
+│   │   ├── validate-bill-proxy/      # Server-side Perplexity proxy (upload validation)
+│   │   ├── script-proxy/             # Server-side Perplexity proxy (call scripts)
 │   │   ├── send-submission-email/    # "Bill received" confirmation
 │   │   └── send-verification-email/  # "Analysis ready" with findings + savings
 │   └── schema/
 │       └── 001_initial_schema.sql    # Production DDL snapshot
 ├── docs/
 │   └── DEPLOY.md                     # Deployment runbook
+├── vercel.json
 ├── .gitignore
 └── README.md
 ```
 
----
+### Database
 
-## Production endpoints
+5 tables in the `public` schema, all with RLS enabled. Full DDL in
+[`supabase/schema/001_initial_schema.sql`](supabase/schema/001_initial_schema.sql).
 
-**Supabase project**: `ilmjduriinjhayaayjpk`
-**Base URL**: `https://ilmjduriinjhayaayjpk.supabase.co`
-
-| Function | Slug | Purpose |
-|---|---|---|
-| `/functions/v1/analyze-bill-v3` | analyze-bill-v3 | Main analyzer used by the frontend |
-| `/functions/v1/chat-proxy` | chat-proxy | Proxies chat → Perplexity (keeps API key off browser) |
-| `/functions/v1/validate-bill-proxy` | validate-bill-proxy | Proxies upload validation → Perplexity (keeps API key off browser) |
-| `/functions/v1/script-proxy` | script-proxy | Proxies call-script generation → Perplexity (keeps API key off browser) |
-| `/functions/v1/send-submission-email` | send-submission-email | Fires when a bill is uploaded |
-| `/functions/v1/send-verification-email` | send-verification-email | Fires once when analysis is verified |
-| `/functions/v1/analyze-bill` | analyze-bill | Legacy analyzer (kept for backward compat) |
-
-All edge functions are deployed with `verify_jwt: false` and use CORS `*`.
+- `ww_households` — onboarded households + utility selections
+- `ww_bill_uploads` — raw uploaded files
+- `ww_analyses` — analysis runs with savings ranges + raw Perplexity JSON
+- `ww_findings` — individual issues surfaced per analysis
+- `ww_rates` — tariff cache (PUC filings + verified utility rates)
 
 ---
 
-## Required secrets
+## Privacy & safety
 
-Set these in Supabase → Project Settings → Edge Functions → Secrets:
-
-| Secret | Used by |
-|---|---|
-| `PERPLEXITY_API_KEY` | `analyze-bill`, `analyze-bill-v3`, `chat-proxy`, `validate-bill-proxy`, `script-proxy` |
-| `RESEND_API_KEY` | `send-submission-email`, `send-verification-email` |
-| `SUPABASE_URL` | All functions (auto-populated) |
-| `SUPABASE_SERVICE_ROLE_KEY` | All functions (auto-populated) |
-
-The frontend reads only `WW_SUPABASE_URL` and `WW_SUPABASE_ANON_KEY` (the
-**publishable** anon key — safe in the browser) from inline `<script>` tags in
-`src/index.html`. **No Perplexity or Resend key is ever placed in client code.**
-Every Perplexity call routes through a Supabase Edge Function
-(`chat-proxy`, `validate-bill-proxy`, `script-proxy`) and every Resend send
-happens server-side (`send-submission-email`, `send-verification-email`). Those
-functions read their keys from Supabase secrets via `Deno.env.get(...)`.
-
-> ⚠️ **Never commit API keys.** Keys belong only in Supabase secrets (or a
-> local git-ignored `.env`). If a key is ever exposed, revoke it at the
-> provider, rotate the Supabase secret, and redeploy.
+- Uploaded bills are stored in Supabase Storage and processed server-side; they
+  are not exposed to the client beyond the uploading user's own session.
+- **No Perplexity, Resend, or service-role key is ever placed in client code.**
+  The browser holds only the **publishable** Supabase anon key
+  (`WW_SUPABASE_ANON_KEY`) and the PostHog project key — both designed to be
+  client-side. Every Perplexity call routes through an edge function
+  (`chat-proxy`, `validate-bill-proxy`, `script-proxy`) and every Resend send
+  happens server-side, with secrets read from Supabase via `Deno.env.get(...)`.
+- Local `.env*` files are git-ignored. If a key is ever exposed, revoke it at
+  the provider, rotate the Supabase secret, and redeploy.
 
 ---
 
@@ -102,23 +134,31 @@ Quick version:
 
 ```bash
 # Frontend → Vercel
-cd src && vercel deploy --prod --yes --scope tejaswarpadala-a11ys-projects
+cd src && vercel deploy --prod --yes
 
 # Edge function → Supabase
 supabase functions deploy <slug> \
-  --project-ref ilmjduriinjhayaayjpk \
+  --project-ref <your-project-ref> \
   --no-verify-jwt
 ```
 
+Required Supabase edge-function secrets:
+
+| Secret | Used by |
+|---|---|
+| `PERPLEXITY_API_KEY` | `analyze-bill`, `analyze-bill-v3`, `chat-proxy`, `validate-bill-proxy`, `script-proxy` |
+| `RESEND_API_KEY` | `send-submission-email`, `send-verification-email` |
+| `SUPABASE_URL` | All functions (auto-populated) |
+| `SUPABASE_SERVICE_ROLE_KEY` | All functions (auto-populated) |
+
 ---
 
-## Database
+## License
 
-5 tables in the `public` schema, all with RLS enabled. Full DDL in
-[`supabase/schema/001_initial_schema.sql`](supabase/schema/001_initial_schema.sql).
+**Proprietary — all rights reserved.**
 
-- `ww_households` — onboarded households + utility selections
-- `ww_bill_uploads` — raw uploaded files
-- `ww_analyses` — analysis runs with savings ranges + raw Perplexity JSON
-- `ww_findings` — individual issues surfaced per analysis
-- `ww_rates` — tariff cache (PUC filings + verified utility rates)
+This repository is published for portfolio and demonstration purposes only. It
+is **not** open source. No license is granted to use, copy, modify, or
+distribute this code or its contents, in whole or in part, without the express
+written permission of the author. All rights are reserved unless the author
+chooses otherwise in the future.
